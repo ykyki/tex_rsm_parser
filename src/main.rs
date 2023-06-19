@@ -1,4 +1,4 @@
-extern crate tex_rs_smparser as lib;
+extern crate tex_rsm_parser as lib;
 
 use lib::parse_paragraphs;
 

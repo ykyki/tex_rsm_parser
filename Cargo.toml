@@ -1,5 +1,5 @@
 [package]
-name = "tex-rs-smparser"
+name = "tex_rsm_parser"
 version = "0.1.0"
 edition = "2021"
 
