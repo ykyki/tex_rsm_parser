@@ -1,3 +1,5 @@
+mod key;
+mod node;
 mod outside;
 mod parser;
 mod tex_char;
