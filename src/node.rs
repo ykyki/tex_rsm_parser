@@ -26,6 +26,6 @@ impl Node {
 }
 
 #[derive(Debug)]
-struct MathExpression {
+pub(super) struct MathExpression {
     content: String,
 }
