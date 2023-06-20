@@ -13,16 +13,41 @@ pub(super) struct ResultMap {
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct Key {
-    // todo
+    value: u32,
+}
+
+impl Key {
+    fn new() -> Self {
+        Self { value: 0 }
+    }
 }
 
 #[derive(Debug)]
 enum Node {
-    ParagraphList { children: Vec<Key> },
-    Paragraph { children: Vec<Key> },
-    ParagraphFailed {}, // todo
-    RawString { content: String },
-    InlineCommand { content: String },
-    InlineMath { content: String },
-    DisplayMath { content: String },
+    ParagraphList(Option<Vec<Key>>),
+    Paragraph(Option<Vec<Key>>),
+    RawString(String),
+    InlineCommand(Option<String>),
+    InlineMath(Option<MathExpression>),
+    DisplayMath(Option<MathExpression>),
+}
+
+impl Node {
+    pub fn is_ok(&self) -> bool {
+        use self::Node::*;
+        matches!(
+            self,
+            ParagraphList(Some(_))
+                | Paragraph(Some(_))
+                | RawString(_)
+                | InlineCommand(Some(_))
+                | InlineMath(Some(_))
+                | DisplayMath(Some(_))
+        )
+    }
+}
+
+#[derive(Debug)]
+struct MathExpression {
+    content: String,
 }
