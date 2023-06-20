@@ -1,5 +1,5 @@
 #[derive(Debug, PartialEq, Eq, Clone)]
-enum TexChar {
+pub(super) enum TexChar {
     Backslash,
     Whitespace,
     LParen,
@@ -39,6 +39,6 @@ mod tests {
     fn TexChar_from_char() {
         use self::TexChar::*;
         assert_eq!(TexChar::from(' '), Whitespace);
-        assert_eq!(TexChar::from('\\'), Whitespace);
+        assert_eq!(TexChar::from('\\'), Backslash);
     }
 }
