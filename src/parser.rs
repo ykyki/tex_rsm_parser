@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 use crate::ParseError;
 
 pub(super) fn parse_paragraphs(input: &str) -> Result<ResultMap, ParseError> {
-    let _ = corrent_lines(input.to_string());
+    let _ = correct_lines(input.to_string());
     todo!();
 }
 
@@ -14,16 +14,15 @@ pub(super) struct ResultMap {
     value: BTreeMap<Key, Node>, // todo
 }
 
-fn corrent_lines(input: String) -> String {
+fn correct_lines(input: String) -> String {
     const COMMENT_DISC: &str = "%";
 
     input
         .lines()
-        .map(|x| x.trim_start())
         .map(
             |x| x.split(COMMENT_DISC).next().unwrap(), // 行末コメント除去
         )
-        .map(|x| x.trim_end())
+        .map(|x| x.trim())
         .collect::<Vec<_>>()
         .join("\n")
 }
@@ -37,7 +36,7 @@ mod tests {
     fn test_correct_lines() {
         macro_rules! assert_correct_lines {
             ($input:expr, $expected:expr) => {
-                assert_eq!(corrent_lines($input.to_string()), $expected.to_string());
+                assert_eq!(correct_lines($input.to_string()), $expected.to_string());
             };
         }
 

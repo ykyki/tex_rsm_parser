@@ -39,7 +39,7 @@ mod tests {
     #[test]
     fn TexChars_from_str() {
         use self::TexChar::*;
-        macro_rules! test_tex_chars {
+        macro_rules! assert_tex_chars {
             ($input:expr, $expected_chars:expr, $expected_len:expr) => {
                 let cs: TexChars = $input.parse().unwrap();
                 assert_eq!(cs.queue.into_iter().collect::<Vec<_>>(), $expected_chars);
@@ -47,17 +47,17 @@ mod tests {
             };
         }
 
-        test_tex_chars!("", vec![], 0);
+        assert_tex_chars!("", vec![], 0);
 
-        test_tex_chars!("abc", vec![Char('a'), Char('b'), Char('c'),], 3);
+        assert_tex_chars!("abc", vec![Char('a'), Char('b'), Char('c'),], 3);
 
-        test_tex_chars!(
+        assert_tex_chars!(
             "いろはに",
             vec![Char('い'), Char('ろ'), Char('は'), Char('に'),],
             4
         );
 
-        test_tex_chars!(
+        assert_tex_chars!(
             r"数式\(x, y\)など.",
             vec![
                 Char('数'),
@@ -77,7 +77,7 @@ mod tests {
             13
         );
 
-        test_tex_chars!(
+        assert_tex_chars!(
             "改行\n\
             \\[\\xi\\]\n\
             など",
@@ -99,7 +99,7 @@ mod tests {
             13
         );
 
-        test_tex_chars!(
+        assert_tex_chars!(
             "空行\n\
             \n\
             あり",
