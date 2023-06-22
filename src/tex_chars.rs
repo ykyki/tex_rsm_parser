@@ -3,12 +3,36 @@ use std::collections::VecDeque;
 use std::str::FromStr;
 
 #[derive(Debug)]
-struct TexChars {
-    total: u32,
+#[cfg_attr(test, derive(PartialEq, Eq))]
+pub(super) struct TexChars {
     queue: VecDeque<TexChar>,
 }
 
-impl TexChars {}
+impl TexChars {
+    pub(crate) fn new() -> Self {
+        Self {
+            queue: VecDeque::new(),
+        }
+    }
+
+    pub fn has_next(&self) -> bool {
+        self.queue.front().is_some()
+    }
+
+    pub(crate) fn next_is(&self, c: TexChar) -> bool {
+        self.queue.front() == Some(&c)
+    }
+
+    pub(crate) fn next_isis(&self, c1: TexChar, c2: TexChar) -> bool {
+        let mut iter = self.queue.iter();
+
+        iter.next() == Some(&c1) && iter.next() == Some(&c2)
+    }
+
+    pub(crate) fn read_next(&self) -> Option<TexChar> {
+        self.queue.front().cloned()
+    }
+}
 
 impl FromStr for TexChars {
     type Err = ();
@@ -16,10 +40,7 @@ impl FromStr for TexChars {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let v = s.chars().map(|x| x.into()).collect::<VecDeque<_>>();
 
-        Ok(Self {
-            total: v.len() as u32,
-            queue: v,
-        })
+        Ok(Self { queue: v })
     }
 }
 
@@ -40,21 +61,19 @@ mod tests {
     fn TexChars_from_str() {
         use self::TexChar::*;
         macro_rules! assert_tex_chars {
-            ($input:expr, $expected_chars:expr, $expected_len:expr) => {
+            ($input:expr, $expected_chars:expr) => {
                 let cs: TexChars = $input.parse().unwrap();
                 assert_eq!(cs.queue.into_iter().collect::<Vec<_>>(), $expected_chars);
-                assert_eq!(cs.total, $expected_len);
             };
         }
 
-        assert_tex_chars!("", vec![], 0);
+        assert_tex_chars!("", vec![]);
 
-        assert_tex_chars!("abc", vec![Char('a'), Char('b'), Char('c'),], 3);
+        assert_tex_chars!("abc", vec![Char('a'), Char('b'), Char('c'),]);
 
         assert_tex_chars!(
             "いろはに",
-            vec![Char('い'), Char('ろ'), Char('は'), Char('に'),],
-            4
+            vec![Char('い'), Char('ろ'), Char('は'), Char('に'),]
         );
 
         assert_tex_chars!(
@@ -73,8 +92,7 @@ mod tests {
                 Char('な'),
                 Char('ど'),
                 Char('.'),
-            ],
-            13
+            ]
         );
 
         assert_tex_chars!(
@@ -95,8 +113,7 @@ mod tests {
                 Return,
                 Char('な'),
                 Char('ど'),
-            ],
-            13
+            ]
         );
 
         assert_tex_chars!(
@@ -110,8 +127,7 @@ mod tests {
                 Return,
                 Char('あ'),
                 Char('り'),
-            ],
-            6
+            ]
         );
     }
 }

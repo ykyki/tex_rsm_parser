@@ -1,4 +1,5 @@
 use crate::key::Key;
+use crate::math_expr::MathExprParseResult;
 
 #[derive(Debug)]
 pub(super) enum Node {
@@ -6,26 +7,20 @@ pub(super) enum Node {
     Paragraph(Option<Vec<Key>>),
     RawString(String),
     InlineCommand(Option<String>),
-    InlineMath(Option<MathExpression>),
-    DisplayMath(Option<MathExpression>),
+    MathExpr(MathExprParseResult),
 }
 
 impl Node {
     pub fn is_ok(&self) -> bool {
-        use self::Node::*;
-        matches!(
-            self,
-            ParagraphList(Some(_))
-                | Paragraph(Some(_))
-                | RawString(_)
-                | InlineCommand(Some(_))
-                | InlineMath(Some(_))
-                | DisplayMath(Some(_))
-        )
-    }
-}
+        use Node::*;
 
-#[derive(Debug)]
-pub(super) struct MathExpression {
-    content: String,
+        match self {
+            ParagraphList(Some(_)) => true,
+            Paragraph(Some(_)) => true,
+            RawString(_) => true,
+            InlineCommand(Some(_)) => true,
+            MathExpr(x) => x.is_ok(),
+            _ => false,
+        }
+    }
 }

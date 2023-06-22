@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter};
+
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(super) enum TexChar {
     Backslash,
@@ -26,6 +28,23 @@ impl From<char> for TexChar {
             '\n' => Return,
             '$' => Dollar,
             _ => Char(c),
+        }
+    }
+}
+
+impl Display for TexChar {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        use self::TexChar::*;
+        match self {
+            Char(c) => write!(f, "{}", c),
+            Backslash => write!(f, "\\"),
+            Whitespace => write!(f, " "),
+            LParen => write!(f, "("),
+            RParen => write!(f, ")"),
+            LBracket => write!(f, "["),
+            RBracket => write!(f, "]"),
+            Return => writeln!(f),
+            Dollar => write!(f, "$"),
         }
     }
 }
