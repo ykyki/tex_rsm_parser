@@ -11,16 +11,16 @@ pub(super) enum Node {
 }
 
 impl Node {
-    pub fn is_ok(&self) -> bool {
-        use Node::*;
-
-        match self {
-            ParagraphList(Some(_)) => true,
-            Paragraph(Some(_)) => true,
-            RawString(_) => true,
-            InlineCommand(Some(_)) => true,
-            MathExpr(x) => x.is_ok(),
-            _ => false,
-        }
-    }
+    // pub fn is_ok(&self) -> bool {
+    //     use Node::*;
+    //
+    //     match self {
+    //         ParagraphList(Some(_)) => true,
+    //         Paragraph(Some(_)) => true,
+    //         RawString(_) => true,
+    //         InlineCommand(Some(_)) => true,
+    //         MathExpr(x) => x.is_ok(),
+    //         _ => false,
+    //     }
+    // }
 }

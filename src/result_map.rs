@@ -26,3 +26,12 @@ impl ResultMap {
         }
     }
 }
+
+impl IntoIterator for ResultMap {
+    type Item = (Key, Node);
+    type IntoIter = std::collections::btree_map::IntoIter<Key, Node>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.columns.into_iter()
+    }
+}

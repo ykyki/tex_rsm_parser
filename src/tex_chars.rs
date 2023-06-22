@@ -9,16 +9,6 @@ pub(super) struct TexChars {
 }
 
 impl TexChars {
-    pub(crate) fn new() -> Self {
-        Self {
-            queue: VecDeque::new(),
-        }
-    }
-
-    pub fn has_next(&self) -> bool {
-        self.queue.front().is_some()
-    }
-
     pub(crate) fn next_is(&self, c: TexChar) -> bool {
         self.queue.front() == Some(&c)
     }

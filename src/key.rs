@@ -11,6 +11,10 @@ impl Key {
     fn increment(&mut self) {
         self.value += 1;
     }
+
+    pub(super) fn to_u32(&self) -> u32 {
+        self.value
+    }
 }
 
 #[derive(Debug)]

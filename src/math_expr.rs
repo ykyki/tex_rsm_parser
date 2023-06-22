@@ -19,6 +19,27 @@ impl MathExprParseResult {
     pub(crate) fn is_ok(&self) -> bool {
         matches!(self, Self::Ok(_))
     }
+
+    pub(crate) fn is_inline(&self) -> bool {
+        match self {
+            Self::Ok(info) => info.disc.is_inline(),
+            Self::Err(info) => info.disc.is_inline(),
+        }
+    }
+
+    pub(crate) fn is_display(&self) -> bool {
+        match self {
+            Self::Ok(info) => info.disc.is_display(),
+            Self::Err(info) => info.disc.is_display(),
+        }
+    }
+
+    pub(crate) fn content(self) -> String {
+        match self {
+            Self::Ok(info) => info.content,
+            Self::Err(info) => info.content,
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -96,16 +117,17 @@ impl MathDisc {
     }
 
     pub(crate) fn consume_end(&self, cs: &mut TexChars) {
-        use MathDisc::*;
-
-        match self {
-            BsParen | BsBracket | DoubleDollar => {
-                cs.next().unwrap();
-                cs.next().unwrap();
-            }
-            SingleDollar => {
-                cs.next().unwrap();
-            }
-        }
+        // use MathDisc::*;
+        //
+        // match self {
+        //     BsParen | BsBracket | DoubleDollar => {
+        //         cs.next().unwrap();
+        //         cs.next().unwrap();
+        //     }
+        //     SingleDollar => {
+        //         cs.next().unwrap();
+        //     }
+        // }
+        self.consume_begin(cs);
     }
 }
