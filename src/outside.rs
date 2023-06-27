@@ -27,7 +27,7 @@ pub fn parse_paragraphs_to_json(input: &str) -> serde_json::Value {
     }
 }
 
-pub(crate) const MAX_INPUT_LENGTH: usize = 100_000;
+pub(crate) const MAX_INPUT_LENGTH: usize = 1_000;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ParseError {
