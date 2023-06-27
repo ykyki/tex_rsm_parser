@@ -11,5 +11,8 @@ fn main() {
         例えば$Y2$は$$x_2 \otimes y_2$$である.
         ";
 
-    println!("{}", parse_paragraphs_to_json(input));
+    println!(
+        "{}",
+        serde_json::to_string(&parse_paragraphs_to_json(input)).unwrap()
+    );
 }
