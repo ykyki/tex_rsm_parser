@@ -1,11 +1,11 @@
 use crate::key::KeyCounter;
 use crate::math_expr::{MathDisc, MathExprParseResult};
 use crate::node::Node;
+use crate::outside::ParseError;
 use crate::outside::MAX_INPUT_LENGTH;
 use crate::result_map::ResultMap;
 use crate::tex_char::TexChar;
 use crate::tex_chars::TexChars;
-use crate::ParseError;
 use std::str::FromStr;
 
 pub(super) fn parse_paragraphs(input: &str) -> Result<ResultMap, ParseError> {
