@@ -12,8 +12,8 @@ pub enum ParseResult {
 }
 
 impl ParseResult {
-    pub(super) fn new_ok(root: ParseResultKey, columns: Vec<ParseResultColumn>) -> Self {
-        Self::Ok(ParseResultOk { root, columns })
+    pub(super) fn new_ok(root: EntryKey, columns: Vec<Entry>) -> Self {
+        Self::Ok(ParseResultOk { root, map: columns })
     }
 
     pub(super) fn new_error(message: String) -> Self {
@@ -23,8 +23,8 @@ impl ParseResult {
 
 #[derive(Debug, Serialize)]
 pub struct ParseResultOk {
-    root: ParseResultKey,
-    columns: Vec<ParseResultColumn>,
+    root: EntryKey,
+    map: Vec<Entry>,
 }
 
 #[derive(Debug, Serialize)]
@@ -33,92 +33,97 @@ pub struct ParseResultError {
 }
 
 #[derive(Debug, Serialize)]
-pub(super) struct ParseResultKey(String);
-
-#[derive(Debug, Serialize)]
-pub(super) struct ParseResultColumn {
-    key: ParseResultKey,
-    kind: ParseResultColumnKind,
-    detail: ParseResultColumnDetail,
+pub(super) struct Entry {
+    key: EntryKey,
+    #[serde(flatten)]
+    value: EntryValue,
 }
 
 #[derive(Debug, Serialize)]
-enum ParseResultColumnDetail {
-    Paragraphs(Vec<ParseResultKey>),
-    Paragraph(Vec<ParseResultKey>),
+pub(super) struct EntryKey(String);
+
+#[derive(Debug, Serialize)]
+#[serde(tag = "kind", content = "value")]
+#[serde(rename_all = "snake_case")]
+enum EntryValue {
+    Paragraphs(Vec<EntryKey>),
+    Paragraph(Vec<EntryKey>),
     Text(String),
-    InlineCommand(String),
-    InlineMath(ParseResultMath),
-    DisplayMath(ParseResultMath),
+    InlineCommand(EVInlineCommand),
+    InlineMath(EVMath),
+    DisplayMath(EVMath),
 }
 
 #[derive(Debug, Serialize)]
-struct ParseResultMath {
-    status: ParseResultMathStatus,
+struct EVInlineCommand(String);
+
+#[derive(Debug, Serialize)]
+struct EVMath {
+    status: EVMathStatus,
     content: String,
 }
 
 #[derive(Debug, Serialize)]
-enum ParseResultMathStatus {
+enum EVMathStatus {
+    #[serde(rename = "ok")]
     Ok,
-    Ng,
+    #[serde(rename = "error")]
+    Error,
 }
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "snake_case")]
-enum ParseResultColumnKind {
-    Paragraphs,
-    Paragraph,
-    Text,
-    InlineCommand,
-    InlineMath,
-    DisplayMath,
-}
+pub(super) fn convert_to_column(key: Key, node: Node) -> Entry {
+    // let kind = match &node {
+    //     Node::ParagraphList(_) => ParseResultColumnKind::Paragraphs,
+    //     Node::Paragraph(_) => ParseResultColumnKind::Paragraph,
+    //     Node::RawString(_) => ParseResultColumnKind::Text,
+    //     Node::InlineCommand(_) => ParseResultColumnKind::InlineCommand,
+    //     Node::MathExpr(v) => {
+    //         if v.is_inline() {
+    //             ParseResultColumnKind::InlineMath
+    //         } else if v.is_display() {
+    //             ParseResultColumnKind::DisplayMath
+    //         } else {
+    //             unreachable!()
+    //         }
+    //     }
+    // };
 
-pub(super) fn convert_to_column(key: Key, node: Node) -> ParseResultColumn {
-    let kind = match &node {
-        Node::ParagraphList(_) => ParseResultColumnKind::Paragraphs,
-        Node::Paragraph(_) => ParseResultColumnKind::Paragraph,
-        Node::RawString(_) => ParseResultColumnKind::Text,
-        Node::InlineCommand(_) => ParseResultColumnKind::InlineCommand,
+    let value = match node {
+        Node::ParagraphList(Some(ks)) => EntryValue::Paragraphs(convert_keys(ks)),
+        Node::Paragraph(Some(ks)) => EntryValue::Paragraph(convert_keys(ks)),
+        Node::RawString(s) => EntryValue::Text(s),
+        Node::InlineCommand(Some(s)) => EntryValue::InlineCommand(EVInlineCommand(s)),
         Node::MathExpr(v) => {
-            if v.is_inline() {
-                ParseResultColumnKind::InlineMath
-            } else if v.is_display() {
-                ParseResultColumnKind::DisplayMath
+            let status = if v.is_ok() {
+                EVMathStatus::Ok
+            } else {
+                EVMathStatus::Error
+            };
+            let is_inline = v.is_inline();
+            let is_display = v.is_display();
+            let content = v.content();
+
+            if is_inline {
+                EntryValue::InlineMath(EVMath { status, content })
+            } else if is_display {
+                EntryValue::DisplayMath(EVMath { status, content })
             } else {
                 unreachable!()
             }
         }
+        _ => EntryValue::Text(String::new()),
     };
 
-    let detail = match node {
-        Node::ParagraphList(Some(ks)) => ParseResultColumnDetail::Paragraphs(convert_keys(ks)),
-        Node::Paragraph(Some(ks)) => ParseResultColumnDetail::Paragraph(convert_keys(ks)),
-        Node::RawString(s) => ParseResultColumnDetail::Text(s),
-        Node::InlineCommand(Some(s)) => ParseResultColumnDetail::InlineCommand(s),
-        Node::MathExpr(v) => ParseResultColumnDetail::InlineMath(ParseResultMath {
-            status: if v.is_ok() {
-                ParseResultMathStatus::Ok
-            } else {
-                ParseResultMathStatus::Ng
-            },
-            content: v.content(),
-        }),
-        _ => ParseResultColumnDetail::Text(String::new()),
-    };
-
-    ParseResultColumn {
+    Entry {
         key: convert_key(key),
-        kind,
-        detail,
+        value,
     }
 }
 
-pub(super) fn convert_key(key: Key) -> ParseResultKey {
-    ParseResultKey(format!("K{:04}", key.to_u32()))
+pub(super) fn convert_key(key: Key) -> EntryKey {
+    EntryKey(format!("K{:04}", key.to_u32()))
 }
 
-fn convert_keys(keys: impl IntoIterator<Item = Key>) -> Vec<ParseResultKey> {
+fn convert_keys(keys: impl IntoIterator<Item = Key>) -> Vec<EntryKey> {
     keys.into_iter().map(convert_key).collect::<Vec<_>>()
 }
