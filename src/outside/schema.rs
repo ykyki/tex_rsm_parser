@@ -11,15 +11,25 @@ pub enum ParseResult {
     Error(ParseResultError),
 }
 
+impl ParseResult {
+    pub(super) fn new_ok(root: ParseResultKey, columns: Vec<ParseResultColumn>) -> Self {
+        Self::Ok(ParseResultOk { root, columns })
+    }
+
+    pub(super) fn new_error(message: String) -> Self {
+        Self::Error(ParseResultError { message })
+    }
+}
+
 #[derive(Debug, Serialize)]
 pub struct ParseResultOk {
-    pub(super) root: ParseResultKey,
-    pub(super) columns: Vec<ParseResultColumn>,
+    root: ParseResultKey,
+    columns: Vec<ParseResultColumn>,
 }
 
 #[derive(Debug, Serialize)]
 pub struct ParseResultError {
-    pub(super) message: String,
+    message: String,
 }
 
 #[derive(Debug, Serialize)]
