@@ -72,22 +72,6 @@ enum EVMathStatus {
 }
 
 pub(super) fn convert_to_column(key: Key, node: Node) -> Entry {
-    // let kind = match &node {
-    //     Node::ParagraphList(_) => ParseResultColumnKind::Paragraphs,
-    //     Node::Paragraph(_) => ParseResultColumnKind::Paragraph,
-    //     Node::RawString(_) => ParseResultColumnKind::Text,
-    //     Node::InlineCommand(_) => ParseResultColumnKind::InlineCommand,
-    //     Node::MathExpr(v) => {
-    //         if v.is_inline() {
-    //             ParseResultColumnKind::InlineMath
-    //         } else if v.is_display() {
-    //             ParseResultColumnKind::DisplayMath
-    //         } else {
-    //             unreachable!()
-    //         }
-    //     }
-    // };
-
     let value = match node {
         Node::ParagraphList(Some(ks)) => EntryValue::Paragraphs(convert_keys(ks)),
         Node::Paragraph(Some(ks)) => EntryValue::Paragraph(convert_keys(ks)),
