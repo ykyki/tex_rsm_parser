@@ -35,7 +35,7 @@ pub struct ParseResultError {
 #[derive(Debug, Serialize)]
 pub(super) struct Entry {
     key: EntryKey,
-    #[serde(flatten)]
+    // #[serde(flatten)]
     value: EntryValue,
 }
 
@@ -43,19 +43,55 @@ pub(super) struct Entry {
 pub(super) struct EntryKey(String);
 
 #[derive(Debug, Serialize)]
-#[serde(tag = "kind", content = "value")]
+#[serde(tag = "kind")]
 #[serde(rename_all = "snake_case")]
 enum EntryValue {
-    Paragraphs(Vec<EntryKey>),
-    Paragraph(Vec<EntryKey>),
-    Text(String),
+    Paragraphs(EVKeys),
+    Paragraph(EVKeys),
+    Text(EVText),
     InlineCommand(EVInlineCommand),
     InlineMath(EVMath),
     DisplayMath(EVMath),
 }
 
 #[derive(Debug, Serialize)]
-struct EVInlineCommand(String);
+struct EVKeys {
+    keys: Vec<EntryKey>,
+}
+
+impl EVKeys {
+    fn new(keys: impl IntoIterator<Item = EntryKey>) -> Self {
+        Self {
+            keys: keys.into_iter().collect(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+struct EVText {
+    content: String,
+}
+
+impl EVText {
+    fn new(content: impl Into<String>) -> Self {
+        Self {
+            content: content.into(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+struct EVInlineCommand {
+    content: String,
+}
+
+impl EVInlineCommand {
+    fn new(content: impl Into<String>) -> Self {
+        Self {
+            content: content.into(),
+        }
+    }
+}
 
 #[derive(Debug, Serialize)]
 struct EVMath {
@@ -73,10 +109,10 @@ enum EVMathStatus {
 
 pub(super) fn convert_to_column(key: Key, node: Node) -> Entry {
     let value = match node {
-        Node::ParagraphList(Some(ks)) => EntryValue::Paragraphs(convert_keys(ks)),
-        Node::Paragraph(Some(ks)) => EntryValue::Paragraph(convert_keys(ks)),
-        Node::RawString(s) => EntryValue::Text(s),
-        Node::InlineCommand(Some(s)) => EntryValue::InlineCommand(EVInlineCommand(s)),
+        Node::ParagraphList(Some(ks)) => EntryValue::Paragraphs(EVKeys::new(convert_keys(ks))),
+        Node::Paragraph(Some(ks)) => EntryValue::Paragraph(EVKeys::new(convert_keys(ks))),
+        Node::RawString(s) => EntryValue::Text(EVText::new(s)),
+        Node::InlineCommand(Some(s)) => EntryValue::InlineCommand(EVInlineCommand::new(s)),
         Node::MathExpr(v) => {
             let status = if v.is_ok() {
                 EVMathStatus::Ok
@@ -95,7 +131,7 @@ pub(super) fn convert_to_column(key: Key, node: Node) -> Entry {
                 unreachable!()
             }
         }
-        _ => EntryValue::Text(String::new()),
+        _ => EntryValue::Text(EVText::new("unknown")), // todo
     };
 
     Entry {
