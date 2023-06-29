@@ -18,11 +18,12 @@ pub fn parse_paragraphs_to_json(input: &str) -> ParseResult {
     }
 }
 
-pub(crate) const MAX_INPUT_LENGTH: usize = 1_000;
+pub(crate) const MAX_INPUT_LENGTH: usize = 100_000;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ParseError {
-    #[error("Too long input. The input must be less than {MAX_INPUT_LENGTH} characters.")]
+    // #[error("Too long input. The input must be less than {MAX_INPUT_LENGTH} characters.")]
+    #[error("Too long input.")]
     TooLongInput,
 }
 
