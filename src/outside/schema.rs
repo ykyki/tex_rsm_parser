@@ -49,13 +49,18 @@ pub(super) struct EntryKey(String);
 
 #[derive(Debug, Serialize)]
 #[serde(tag = "kind")]
-#[serde(rename_all = "snake_case")]
 enum EntryValue {
+    #[serde(rename = "paras")]
     Paragraphs(EVKeys),
+    #[serde(rename = "para")]
     Paragraph(EVKeys),
+    #[serde(rename = "text")]
     Text(EVText),
+    #[serde(rename = "il_cmd")]
     InlineCommand(EVInlineCommand),
+    #[serde(rename = "il_math")]
     InlineMath(EVMath),
+    #[serde(rename = "ds_math")]
     DisplayMath(EVMath),
 }
 
