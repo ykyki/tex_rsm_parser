@@ -17,7 +17,7 @@ pub(super) struct ParseOk {
 pub(super) fn parse_paragraphs(input: &str) -> Result<ParseOk, ParseError> {
     let input = correct_lines(input.to_string());
 
-    let char_count = input.len();
+    let char_count = input.chars().count();
     if char_count > MAX_INPUT_LENGTH {
         return Err(ParseError::TooLongInput);
     }
