@@ -57,8 +57,6 @@ fn parse_into_paragraphs(input: String) -> Vec<TexChars> {
 }
 
 fn parse_paragraph(mut cs: TexChars, kc: &mut KeyCounter) -> ResultMap {
-    use TexChar::*;
-
     let key = kc.count();
 
     let mut maps = Vec::new();
@@ -82,7 +80,7 @@ fn parse_paragraph(mut cs: TexChars, kc: &mut KeyCounter) -> ResultMap {
             continue;
         }
 
-        if cs.next_is(Backslash) {
+        if cs.next_is(TexChar::Backslash) {
             push_raw_string!();
             let map = parse_inline_command(&mut cs, kc);
             maps.push(map);
@@ -141,7 +139,7 @@ fn parse_inline_command(cs: &mut TexChars, kc: &mut KeyCounter) -> ResultMap {
 
     buffer.push(cs.next().unwrap());
 
-    // todo 仮置き
+    // todo
     loop {
         if let Some(TexChar::Char(c)) = cs.read_next() {
             if c.is_alphabetic() {

@@ -12,8 +12,8 @@ pub enum ParseResult {
 }
 
 impl ParseResult {
-    pub(super) fn new_ok(root: EntryKey, columns: Vec<Entry>) -> Self {
-        Self::Ok(ParseResultOk { root, map: columns })
+    pub(super) fn new_ok(root: EntryKey, entries: Vec<Entry>) -> Self {
+        Self::Ok(ParseResultOk { root, entries })
     }
 
     pub(super) fn new_error(message: String) -> Self {
@@ -24,7 +24,7 @@ impl ParseResult {
 #[derive(Debug, Serialize)]
 pub struct ParseResultOk {
     root: EntryKey,
-    map: Vec<Entry>,
+    entries: Vec<Entry>,
 }
 
 #[derive(Debug, Serialize)]
@@ -107,7 +107,7 @@ enum EVMathStatus {
     Error,
 }
 
-pub(super) fn convert_to_column(key: Key, node: Node) -> Entry {
+pub(super) fn convert_to_entry(key: Key, node: Node) -> Entry {
     let value = match node {
         Node::ParagraphList(Some(ks)) => EntryValue::Paragraphs(EVKeys::new(convert_keys(ks))),
         Node::Paragraph(Some(ks)) => EntryValue::Paragraph(EVKeys::new(convert_keys(ks))),

@@ -5,14 +5,14 @@ use std::collections::BTreeMap;
 #[derive(Debug)]
 pub(super) struct ResultMap {
     root: Key,
-    columns: BTreeMap<Key, Node>,
+    entries: BTreeMap<Key, Node>,
 }
 
 impl ResultMap {
     pub(crate) fn new(key: Key, node: Node) -> Self {
         Self {
             root: key.clone(),
-            columns: BTreeMap::from([(key, node)]),
+            entries: BTreeMap::from([(key, node)]),
         }
     }
 
@@ -22,7 +22,7 @@ impl ResultMap {
 
     pub(crate) fn merge(&mut self, children: impl IntoIterator<Item = Self>) {
         for child in children {
-            self.columns.extend(child.columns);
+            self.entries.extend(child.entries);
         }
     }
 }
@@ -32,6 +32,6 @@ impl IntoIterator for ResultMap {
     type IntoIter = std::collections::btree_map::IntoIter<Key, Node>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.columns.into_iter()
+        self.entries.into_iter()
     }
 }

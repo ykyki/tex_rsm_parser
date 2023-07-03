@@ -1,4 +1,4 @@
-use crate::outside::schema::{convert_key, convert_to_column, ParseResult};
+use crate::outside::schema::{convert_key, convert_to_entry, ParseResult};
 use crate::parser::parse_paragraphs;
 
 pub fn parse_paragraphs_to_json(input: &str) -> ParseResult {
@@ -8,12 +8,12 @@ pub fn parse_paragraphs_to_json(input: &str) -> ParseResult {
         Err(e) => ParseResult::new_error(e.to_string()),
         Ok(map) => {
             let root = convert_key(map.root());
-            let columns = map
+            let entries = map
                 .into_iter()
-                .map(|(key, node)| convert_to_column(key, node))
+                .map(|(key, node)| convert_to_entry(key, node))
                 .collect::<Vec<_>>();
 
-            ParseResult::new_ok(root, columns)
+            ParseResult::new_ok(root, entries)
         }
     }
 }
