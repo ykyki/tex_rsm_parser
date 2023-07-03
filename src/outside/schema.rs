@@ -12,8 +12,12 @@ pub enum ParseResult {
 }
 
 impl ParseResult {
-    pub(super) fn new_ok(root: EntryKey, entries: Vec<Entry>) -> Self {
-        Self::Ok(ParseResultOk { root, entries })
+    pub(super) fn new_ok(root: EntryKey, entries: Vec<Entry>, char_count: usize) -> Self {
+        Self::Ok(ParseResultOk {
+            root,
+            entries,
+            count: char_count,
+        })
     }
 
     pub(super) fn new_error(message: String) -> Self {
@@ -25,6 +29,7 @@ impl ParseResult {
 pub struct ParseResultOk {
     root: EntryKey,
     entries: Vec<Entry>,
+    count: usize,
 }
 
 #[derive(Debug, Serialize)]

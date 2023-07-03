@@ -8,10 +8,17 @@ use crate::tex_char::TexChar;
 use crate::tex_chars::TexChars;
 use std::str::FromStr;
 
-pub(super) fn parse_paragraphs(input: &str) -> Result<ResultMap, ParseError> {
+#[derive(Debug)]
+pub(super) struct ParseOk {
+    pub rmap: ResultMap,
+    pub char_count: usize,
+}
+
+pub(super) fn parse_paragraphs(input: &str) -> Result<ParseOk, ParseError> {
     let input = correct_lines(input.to_string());
 
-    if input.len() > MAX_INPUT_LENGTH {
+    let char_count = input.len();
+    if char_count > MAX_INPUT_LENGTH {
         return Err(ParseError::TooLongInput);
     }
 
@@ -24,13 +31,13 @@ pub(super) fn parse_paragraphs(input: &str) -> Result<ResultMap, ParseError> {
         .map(|cs| parse_paragraph(cs, &mut kc))
         .collect();
 
-    let mut map = ResultMap::new(
+    let mut rmap = ResultMap::new(
         key,
         Node::ParagraphList(Some(ps.iter().map(|x| x.root()).collect())),
     );
-    map.merge(ps);
+    rmap.merge(ps);
 
-    Ok(map)
+    Ok(ParseOk { rmap, char_count })
 }
 
 const EOL: &str = "\n";

@@ -1,19 +1,19 @@
 use crate::outside::schema::{convert_key, convert_to_entry, ParseResult};
-use crate::parser::parse_paragraphs;
+use crate::parser::{parse_paragraphs, ParseOk};
 
 pub fn parse_paragraphs_to_json(input: &str) -> ParseResult {
     let result = parse_paragraphs(input);
 
     match result {
         Err(e) => ParseResult::new_error(e.to_string()),
-        Ok(map) => {
-            let root = convert_key(map.root());
-            let entries = map
+        Ok(ParseOk { rmap, char_count }) => {
+            let root = convert_key(rmap.root());
+            let entries = rmap
                 .into_iter()
                 .map(|(key, node)| convert_to_entry(key, node))
                 .collect::<Vec<_>>();
 
-            ParseResult::new_ok(root, entries)
+            ParseResult::new_ok(root, entries, char_count)
         }
     }
 }
