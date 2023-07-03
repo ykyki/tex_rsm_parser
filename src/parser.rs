@@ -71,11 +71,12 @@ fn parse_paragraph(mut cs: TexChars, kc: &mut KeyCounter) -> ResultMap {
 
     macro_rules! push_raw_string {
         () => {
-            if !buffer.is_empty() {
-                let node = Node::RawString(buffer.iter().map(|c| c.to_string()).collect());
+            let content = buffer_to_string(&mut buffer);
+            if !content.is_empty() {
+                let node = Node::RawString(content);
                 maps.push(ResultMap::new(kc.count(), node));
-                buffer.clear();
             }
+            buffer.clear();
         };
     }
 
@@ -131,7 +132,7 @@ fn parse_math_expr(cs: &mut TexChars, kc: &mut KeyCounter, disc: MathDisc) -> Re
         }
     }
 
-    let content = buffer.iter().map(|c| c.to_string()).collect();
+    let content = buffer_to_string(&mut buffer);
     let node = if completed {
         MathExprParseResult::ok(content, disc)
     } else {
@@ -158,9 +159,14 @@ fn parse_inline_command(cs: &mut TexChars, kc: &mut KeyCounter) -> ResultMap {
         break;
     }
 
-    let content = buffer.iter().map(|c| c.to_string()).collect();
+    let content = buffer_to_string(&mut buffer);
 
     ResultMap::new(kc.count(), Node::InlineCommand(Some(content)))
+}
+
+fn buffer_to_string(cs: &mut [TexChar]) -> String {
+    let s: String = cs.iter().map(|c| c.to_string()).collect();
+    s.trim().to_owned()
 }
 
 //noinspection ALL
