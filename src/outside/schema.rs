@@ -1,6 +1,7 @@
 use crate::key::Key;
 use crate::node::Node;
 use serde::Serialize;
+use std::collections::HashMap;
 
 #[derive(Debug, Serialize)]
 #[serde(tag = "status")]
@@ -117,10 +118,14 @@ enum EVMathStatus {
     Error,
 }
 
-pub(super) fn convert_to_entry(key: Key, node: Node) -> Entry {
+pub(super) fn convert_to_entry(key: Key, node: Node, hash_table: &HashMap<Key, String>) -> Entry {
     let value = match node {
-        Node::ParagraphList(Some(ks)) => EntryValue::Paragraphs(EVKeys::new(convert_keys(ks))),
-        Node::Paragraph(Some(ks)) => EntryValue::Paragraph(EVKeys::new(convert_keys(ks))),
+        Node::ParagraphList(Some(ks)) => {
+            EntryValue::Paragraphs(EVKeys::new(convert_keys(ks, hash_table)))
+        }
+        Node::Paragraph(Some(ks)) => {
+            EntryValue::Paragraph(EVKeys::new(convert_keys(ks, hash_table)))
+        }
         Node::RawString(s) => EntryValue::Text(EVText::new(s)),
         Node::InlineCommand(Some(s)) => EntryValue::InlineCommand(EVInlineCommand::new(s)),
         Node::MathExpr(v) => {
@@ -145,15 +150,20 @@ pub(super) fn convert_to_entry(key: Key, node: Node) -> Entry {
     };
 
     Entry {
-        key: convert_key(key),
+        key: convert_key(key, hash_table),
         value,
     }
 }
 
-pub(super) fn convert_key(key: Key) -> EntryKey {
-    EntryKey(format!("K{:04}", key.to_u32()))
+pub(super) fn convert_key(key: Key, hash_table: &HashMap<Key, String>) -> EntryKey {
+    EntryKey(hash_table.get(&key).unwrap().to_owned())
 }
 
-fn convert_keys(keys: impl IntoIterator<Item = Key>) -> Vec<EntryKey> {
-    keys.into_iter().map(convert_key).collect::<Vec<_>>()
+fn convert_keys(
+    keys: impl IntoIterator<Item = Key>,
+    hash_table: &HashMap<Key, String>,
+) -> Vec<EntryKey> {
+    keys.into_iter()
+        .map(|k| convert_key(k, hash_table))
+        .collect::<Vec<_>>()
 }

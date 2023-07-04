@@ -1,7 +1,7 @@
 use crate::tex_char::TexChar;
 use crate::tex_chars::TexChars;
 
-#[derive(Debug)]
+#[derive(Debug, Hash)]
 pub(super) enum MathExprParseResult {
     Ok(MathExprInfo),
     Err(MathExprInfo),
@@ -42,13 +42,13 @@ impl MathExprParseResult {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash)]
 pub(super) struct MathExprInfo {
     disc: MathDisc,
     content: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash)]
 pub(super) enum MathDisc {
     BsParen,
     BsBracket,

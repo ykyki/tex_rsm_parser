@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Hash)]
 pub(super) struct Key {
     value: u32,
 }

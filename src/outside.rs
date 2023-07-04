@@ -7,10 +7,11 @@ pub fn parse_paragraphs_to_json(input: &str) -> ParseResult {
     match result {
         Err(e) => ParseResult::new_error(e.to_string()),
         Ok(ParseOk { rmap, char_count }) => {
-            let root = convert_key(rmap.root());
+            let hash_table = rmap.hash_table();
+            let root = convert_key(rmap.root(), &hash_table);
             let entries = rmap
                 .into_iter()
-                .map(|(key, node)| convert_to_entry(key, node))
+                .map(|(key, node)| convert_to_entry(key, node, &hash_table))
                 .collect::<Vec<_>>();
 
             ParseResult::new_ok(root, entries, char_count)
