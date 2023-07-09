@@ -22,6 +22,14 @@ impl TexChars {
     pub(crate) fn read_next(&self) -> Option<TexChar> {
         self.queue.front().cloned()
     }
+
+    pub(crate) fn into_content_string(self) -> String {
+        self.queue
+            .into_iter()
+            .filter(|x| !matches!(x, TexChar::Return)) // 改行は無視する
+            .map(|x| x.to_string())
+            .collect()
+    }
 }
 
 impl FromStr for TexChars {
@@ -39,6 +47,14 @@ impl Iterator for TexChars {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.queue.pop_front()
+    }
+}
+
+impl FromIterator<TexChar> for TexChars {
+    fn from_iter<T: IntoIterator<Item = TexChar>>(iter: T) -> Self {
+        Self {
+            queue: iter.into_iter().collect(),
+        }
     }
 }
 
