@@ -24,11 +24,53 @@ impl TexChars {
     }
 
     pub(crate) fn into_content_string(self) -> String {
-        self.queue
+        use TexChar::*;
+
+        fn drop_head_whitespaces(cs: impl IntoIterator<Item = TexChar>) -> Vec<TexChar> {
+            cs.into_iter()
+                .skip_while(|c| matches!(c, Whitespace))
+                .collect()
+        }
+
+        let cs: Vec<_> = self.queue.into();
+
+        // 先頭の空白は除去する
+        let cs: Vec<_> = drop_head_whitespaces(cs);
+
+        // 末尾の空白は除去する
+        let cs: Vec<_> = drop_head_whitespaces(cs.into_iter().rev())
             .into_iter()
-            .filter(|x| !matches!(x, TexChar::Return)) // 改行は無視する
-            .map(|x| x.to_string())
-            .collect()
+            .rev()
+            .collect();
+
+        // Comma+Return を Comma+Whitespace に変換する
+        // Period+Return を Period+Whitespace に変換する
+        let mut cs = cs;
+        {
+            let len = cs.len();
+            for i in 0..len {
+                if matches!(cs[i], Comma | Period) {
+                    if let Some(Return) = cs.get(i + 1) {
+                        cs[i + 1] = Whitespace;
+                    }
+                }
+            }
+        }
+        let cs: Vec<_> = cs;
+
+        // 連続する空白は1つに潰す
+        let mut cs = cs;
+        cs.dedup_by(|a, b| matches!(a, Whitespace) && matches!(b, Whitespace));
+        let cs: Vec<_> = cs;
+
+        // 改行は無視する
+        let cs: Vec<_> = cs
+            .into_iter()
+            .filter(|x| !matches!(x, TexChar::Return))
+            .collect();
+
+        // 文字列に変換
+        cs.into_iter().map(|x| x.to_string()).collect()
     }
 }
 
@@ -58,6 +100,7 @@ impl FromIterator<TexChar> for TexChars {
     }
 }
 
+//noinspection ALL
 #[allow(non_snake_case)]
 #[cfg(test)]
 mod tests {
@@ -135,5 +178,27 @@ mod tests {
                 Char('り'),
             ]
         );
+    }
+
+    #[test]
+    fn 動作確認_into_content_string() {
+        macro_rules! assert_content_string {
+            ($input:expr, $expected:expr) => {
+                let cs: TexChars = $input.parse().unwrap();
+                assert_eq!(cs.into_content_string(), $expected);
+            };
+        }
+
+        assert_content_string!("foo ", "foo");
+        assert_content_string!(" foo", "foo");
+        assert_content_string!("  foo   ", "foo");
+
+        assert_content_string!("foo\nbar", "foobar");
+        assert_content_string!("foo,\nbar", "foo, bar");
+        assert_content_string!("foo.\nbar", "foo. bar");
+
+        assert_content_string!(" X,  Y,   Z, W  ", "X, Y, Z, W");
+
+        assert_content_string!("foo, \nbar", "foo, bar");
     }
 }
