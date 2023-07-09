@@ -36,7 +36,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_KeyCounter() {
+    fn KeyCounter() {
         let mut kc = KeyCounter::new();
         assert_eq!(kc.count(), Key { value: 0 });
         assert_eq!(kc.count(), Key { value: 1 });

@@ -71,7 +71,7 @@ fn parse_paragraph(mut cs: TexChars, kc: &mut KeyCounter) -> ResultMap {
 
     macro_rules! push_raw_string {
         () => {
-            let content = buffer_to_string(&mut buffer);
+            let content = buffer_to_content_string(&mut buffer);
             if !content.is_empty() {
                 let node = Node::RawString(content);
                 maps.push(ResultMap::new(kc.count(), node));
@@ -116,11 +116,11 @@ fn parse_math_expr(cs: &mut TexChars, kc: &mut KeyCounter, disc: MathDisc) -> Re
     disc.consume_begin(cs);
 
     let mut buffer = Vec::new();
-    let mut completed = false;
+    let mut match_end = false;
 
     loop {
         if disc.match_end(cs) {
-            completed = true;
+            match_end = true;
             disc.consume_end(cs);
             break;
         }
@@ -132,8 +132,8 @@ fn parse_math_expr(cs: &mut TexChars, kc: &mut KeyCounter, disc: MathDisc) -> Re
         }
     }
 
-    let content = buffer_to_string(&mut buffer);
-    let node = if completed {
+    let content = buffer_to_content_string(&mut buffer);
+    let node = if match_end {
         MathExprParseResult::ok(content, disc)
     } else {
         MathExprParseResult::err(content, disc)
@@ -159,12 +159,12 @@ fn parse_inline_command(cs: &mut TexChars, kc: &mut KeyCounter) -> ResultMap {
         break;
     }
 
-    let content = buffer_to_string(&mut buffer);
+    let content = buffer_to_content_string(&mut buffer);
 
     ResultMap::new(kc.count(), Node::InlineCommand(Some(content)))
 }
 
-fn buffer_to_string(cs: &mut Vec<TexChar>) -> String {
+fn buffer_to_content_string(cs: &mut Vec<TexChar>) -> String {
     let cs = std::mem::take(cs);
     TexChars::from_iter(cs).into_content_string()
 }
@@ -190,8 +190,7 @@ mod tests {
 
         #[test]
         fn 除去される文字は文字数制限にカウントしない() {
-            let input = "a".repeat(MAX_INPUT_LENGTH);
-            let input = format!(" {input} %foo");
+            let input = "a".repeat(MAX_INPUT_LENGTH) + " %foo";
 
             assert!(!matches!(
                 parse_paragraphs(&input),
@@ -200,7 +199,7 @@ mod tests {
         }
 
         #[test]
-        fn 動作テスト() {
+        fn 動作確認() {
             let input = r"
             「イーハトーヴォ」という言葉は、
             私の知識の範囲では特定の意味を持つ言葉ではありません。
@@ -222,7 +221,7 @@ mod tests {
         }
 
         #[test]
-        fn 動作テスト2() {
+        fn 動作確認2() {
             let input = r"abc
              \( \mathscr{V} \defeq U_x^X \)は\( X \)の開被覆である.\foo
         例えば$Y$は$x \otimes y$である(\ref):

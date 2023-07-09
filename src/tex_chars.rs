@@ -46,13 +46,10 @@ impl TexChars {
         // Comma+Return を Comma+Whitespace に変換する
         // Period+Return を Period+Whitespace に変換する
         let mut cs = cs;
-        {
-            let len = cs.len();
-            for i in 0..len {
-                if matches!(cs[i], Comma | Period) {
-                    if let Some(Return) = cs.get(i + 1) {
-                        cs[i + 1] = Whitespace;
-                    }
+        for i in 0..cs.len() {
+            if matches!(cs[i], Comma | Period) {
+                if let Some(Return) = cs.get(i + 1) {
+                    cs[i + 1] = Whitespace;
                 }
             }
         }
@@ -60,17 +57,17 @@ impl TexChars {
 
         // 連続する空白は1つに潰す
         let mut cs = cs;
-        cs.dedup_by(|a, b| matches!(a, Whitespace) && matches!(b, Whitespace));
+        cs.dedup_by(|c1, c2| matches!(c1, Whitespace) && matches!(c2, Whitespace));
         let cs: Vec<_> = cs;
 
         // 改行は無視する
         let cs: Vec<_> = cs
             .into_iter()
-            .filter(|x| !matches!(x, TexChar::Return))
+            .filter(|c| !matches!(c, TexChar::Return))
             .collect();
 
         // 文字列に変換
-        cs.into_iter().map(|x| x.to_string()).collect()
+        cs.into_iter().map(|c| c.to_string()).collect()
     }
 }
 
@@ -107,7 +104,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn TexChars_from_str() {
+    fn from_str() {
         use self::TexChar::*;
         macro_rules! assert_tex_chars {
             ($input:expr, $expected_chars:expr) => {
@@ -181,7 +178,7 @@ mod tests {
     }
 
     #[test]
-    fn 動作確認_into_content_string() {
+    fn into_content_string() {
         macro_rules! assert_content_string {
             ($input:expr, $expected:expr) => {
                 let cs: TexChars = $input.parse().unwrap();
