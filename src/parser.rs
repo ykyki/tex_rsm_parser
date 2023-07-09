@@ -166,8 +166,7 @@ fn parse_inline_command(cs: &mut TexChars, kc: &mut KeyCounter) -> ResultMap {
 
 fn buffer_to_string(cs: &mut Vec<TexChar>) -> String {
     let cs = std::mem::take(cs);
-    let s: String = TexChars::from_iter(cs).into_content_string();
-    s.trim().to_owned()
+    TexChars::from_iter(cs).into_content_string()
 }
 
 //noinspection ALL
