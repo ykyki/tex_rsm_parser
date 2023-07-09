@@ -10,6 +10,8 @@ pub(super) enum TexChar {
     RBracket,
     Dollar,
     Return,
+    Period,
+    Comma,
     Char(char),
 }
 
@@ -20,6 +22,8 @@ impl From<char> for TexChar {
         use self::TexChar::*;
         match c {
             ' ' => Whitespace,
+            '.' => Period,
+            ',' => Comma,
             '\\' => Backslash,
             '(' => LParen,
             ')' => RParen,
@@ -45,6 +49,8 @@ impl Display for TexChar {
             RBracket => write!(f, "]"),
             Return => writeln!(f),
             Dollar => write!(f, "$"),
+            Period => write!(f, "."),
+            Comma => write!(f, ","),
         }
     }
 }

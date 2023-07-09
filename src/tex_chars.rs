@@ -90,14 +90,14 @@ mod tests {
                 Backslash,
                 LParen,
                 Char('x'),
-                Char(','),
+                Comma,
                 Whitespace,
                 Char('y'),
                 Backslash,
                 RParen,
                 Char('な'),
                 Char('ど'),
-                Char('.'),
+                Period,
             ]
         );
 
