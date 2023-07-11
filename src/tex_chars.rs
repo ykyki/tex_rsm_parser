@@ -43,28 +43,36 @@ impl TexChars {
             .rev()
             .collect();
 
-        // Comma+Return を Comma+Whitespace に変換する
-        // Period+Return を Period+Whitespace に変換する
-        let mut cs = cs;
-        for i in 0..cs.len() {
-            if matches!(cs[i], Comma | Period) {
-                if let Some(Return) = cs.get(i + 1) {
-                    cs[i + 1] = Whitespace;
+        // 改行前後の空白処理
+        // Comma, Period, alphanumeric, ?, ! の後の Return は Whitespace に変換する
+        // それ以外の Return は無視する
+        // let mut cs = cs;
+        let mut new_cs = Vec::new();
+        for c in cs {
+            if c == Return {
+                if let Some(last) = new_cs.last() {
+                    match last {
+                        Comma | Period => {
+                            new_cs.push(Whitespace);
+                        }
+                        Char(c) => {
+                            if c.is_ascii_alphanumeric() || *c == '?' || *c == '!' {
+                                new_cs.push(Whitespace);
+                            }
+                        }
+                        _ => {}
+                    }
                 }
+            } else {
+                new_cs.push(c);
             }
         }
-        let cs: Vec<_> = cs;
+        let cs: Vec<_> = new_cs;
 
         // 連続する空白は1つに潰す
         let mut cs = cs;
         cs.dedup_by(|c1, c2| matches!(c1, Whitespace) && matches!(c2, Whitespace));
         let cs: Vec<_> = cs;
-
-        // 改行は無視する
-        let cs: Vec<_> = cs
-            .into_iter()
-            .filter(|c| !matches!(c, TexChar::Return))
-            .collect();
 
         // 文字列に変換
         cs.into_iter().map(|c| c.to_string()).collect()
@@ -190,9 +198,19 @@ mod tests {
         assert_content_string!(" foo", "foo");
         assert_content_string!("  foo   ", "foo");
 
-        assert_content_string!("foo\nbar", "foobar");
+        assert_content_string!("", "");
+        assert_content_string!(" ", "");
+
+        assert_content_string!("foo\nbar", "foo bar");
+        assert_content_string!("FOO\nbar", "FOO bar");
+        assert_content_string!("123\n456", "123 456");
+        assert_content_string!("あいう\nえお", "あいうえお");
+        assert_content_string!("あいう\neo", "あいうeo");
         assert_content_string!("foo,\nbar", "foo, bar");
         assert_content_string!("foo.\nbar", "foo. bar");
+        assert_content_string!("foo?\nbar", "foo? bar");
+        assert_content_string!("foo!\nbar", "foo! bar");
+        assert_content_string!("foo#\nbar", "foo#bar");
 
         assert_content_string!(" X,  Y,   Z, W  ", "X, Y, Z, W");
 
