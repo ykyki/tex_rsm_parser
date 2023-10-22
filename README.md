@@ -1,1 +1,1 @@
-# tex-rs-smparser
+# tex_rsm_parser
